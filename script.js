@@ -4,7 +4,7 @@
 // - 'remote' для работы с Railway (https://heavy-logic-api.up.railway.app)
 const API_MODE = 'remote'; // поменяй на 'remote' при деплое
 
-const API_BASE_URL = API_MODE === 'local' 
+const API_BASE_URL = API_MODE === 'remote' 
     ? 'http://127.0.0.1:8000' 
     : 'https://heavy-logic-api-production.up.railway.app';
 
