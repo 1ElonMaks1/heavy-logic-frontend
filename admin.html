@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админка Heavy Logic</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container { max-width: 800px; margin: 40px auto; }
+        .product-edit { border: 1.5px solid #000; padding: 20px; margin-bottom: 20px; }
+        label { display: block; margin: 10px 0 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container admin-container">
+        <h1>Админ-панель</h1>
+        <div id="login-panel">
+            <input type="password" id="admin-password" placeholder="Пароль">
+            <button id="login-btn" class="btn">Войти</button>
+        </div>
+        <div id="editor-panel" style="display: none;">
+            <button id="save-btn" class="btn">Сохранить изменения (скачать JSON)</button>
+            <button id="add-product-btn" class="btn" style="background: white; color: black;">Добавить товар</button>
+            <div id="products-editor"></div>
+            <p><a href="products.json" download="products_backup.json">Скачать резервную копию JSON</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Замените хэш на свой (SHA-256 от вашего пароля)
+        const SECRET_HASH = 'a21a4cdc3eab3e1ee4d64bfe63081801ef0cded049c2f0e8c30abe78d66808c4'; // пароль "password"
+        let products = [];
+
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const pass = document.getElementById('admin-password').value;
+            const encoder = new TextEncoder();
+            const data = encoder.encode(pass);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            if (hashHex === SECRET_HASH) {
+                sessionStorage.setItem('admin_auth', 'true');
+                document.getElementById('login-panel').style.display = 'none';
+                document.getElementById('editor-panel').style.display = 'block';
+                loadProducts();
+            } else {
+                alert('Неверный пароль');
+            }
+        });
+
+        if (sessionStorage.getItem('admin_auth') === 'true') {
+            document.getElementById('login-panel').style.display = 'none';
+            document.getElementById('editor-panel').style.display = 'block';
+            loadProducts();
+        }
+
+        async function loadProducts() {
+            const res = await fetch('products.json');
+            products = await res.json();
+            renderEditor();
+        }
+
+        function renderEditor() {
+            const container = document.getElementById('products-editor');
+            container.innerHTML = '';
+            products.forEach((product, index) => {
+                const div = document.createElement('div');
+                div.className = 'product-edit';
+                div.innerHTML = `
+                    <h3>${product.name} (ID: ${product.id})</h3>
+                    <label>Название: <input data-index="${index}" data-field="name" value="${product.name}"></label>
+                    <label>Цена: <input data-index="${index}" data-field="price" type="number" value="${product.price}"></label>
+                    <label>Старая цена: <input data-index="${index}" data-field="oldPrice" type="number" value="${product.oldPrice || ''}"></label>
+                    <label>Описание: <textarea data-index="${index}" data-field="description">${product.description}</textarea></label>
+                    <label>Изображение (URL): <input data-index="${index}" data-field="image" value="${product.image}"></label>
+                    <label>Характеристики (через запятую): <input data-index="${index}" data-field="featuresStr" value="${product.features.join(', ')}"></label>
+                    <button class="remove-product" data-index="${index}" style="background: none; border: 1.5px solid #000; padding: 5px 10px; cursor: pointer;">Удалить товар</button>
+                `;
+                container.appendChild(div);
+            });
+
+            document.querySelectorAll('.remove-product').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.target.dataset.index;
+                    products.splice(index, 1);
+                    renderEditor();
+                });
+            });
+        }
+
+        document.getElementById('save-btn').addEventListener('click', () => {
+            const inputs = document.querySelectorAll('[data-index]');
+            inputs.forEach(input => {
+                const index = input.dataset.index;
+                const field = input.dataset.field;
+                let value = input.value;
+                if (field === 'price' || field === 'oldPrice') value = Number(value);
+                if (field === 'featuresStr') {
+                    products[index].features = value.split(',').map(s => s.trim());
+                } else {
+                    products[index][field] = value;
+                }
+            });
+            const blob = new Blob([JSON.stringify(products, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'products.json';
+            a.click();
+            alert('Файл сохранён. Замените им products.json на сервере.');
+        });
+
+        document.getElementById('add-product-btn').addEventListener('click', () => {
+            const newId = Math.max(...products.map(p => p.id), 0) + 1;
+            products.push({
+                id: newId,
+                name: 'Новый товар',
+                price: 0,
+                oldPrice: null,
+                description: '',
+                features: [''],
+                image: 'images/placeholder.jpg'
+            });
+            renderEditor();
+        });
+    </script>
+</body>
+</html>

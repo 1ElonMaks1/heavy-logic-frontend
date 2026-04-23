@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина — Heavy Logic</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container" style="display: flex; align-items: center; flex-wrap: wrap;">
+            <a href="index.html" class="logo">⚡ HEAVY LOGIC</a>
+            <nav style="margin-left: 30px;">
+                <a href="index.html">Главная</a>
+                <a href="shop.html">Магазин</a>
+                <a href="services.html">Услуги</a>
+                <a href="blog.html">Лаб / Блог</a>
+            </nav>
+            <div class="cart-icon">
+                <a href="cart.html" class="cart-link">🛒 Корзина</a>
+                <span id="cart-count" class="cart-count">0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1>Корзина</h1>
+        
+        <!-- Список товаров -->
+        <div id="cart-items-container">
+            <p>Ваша корзина пуста.</p>
+        </div>
+
+        <!-- Блок доставки -->
+        <div id="shipping-block" style="display: none; margin: 30px 0; border-top: 1.5px solid #000; padding-top: 25px;">
+            <h3>Способ доставки</h3>
+            <div style="display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="radio" name="shipping" value="pickup" checked> Самовывоз (бесплатно)
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="radio" name="shipping" value="courier"> Курьером — 350 ₽
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="radio" name="shipping" value="post"> Почта России — 250 ₽
+                </label>
+            </div>
+            <p style="font-size: 14px; color: #555;">Бесплатная доставка курьером при заказе от 5 000 ₽.</p>
+        </div>
+
+        <!-- Итоговая сумма -->
+        <div class="cart-total" id="cart-total" style="display: none;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Товары:</span>
+                <span id="subtotal-price">0</span> ₽
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Доставка:</span>
+                <span id="shipping-price">0</span> ₽
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 24px; font-weight: bold; border-top: 2px solid #000; padding-top: 15px; margin-top: 10px;">
+                <span>Итого:</span>
+                <span id="total-price">0</span> ₽
+            </div>
+        </div>
+
+        <button id="checkout-btn" class="btn" style="display: none; margin-top: 20px;">Оформить заказ</button>
+        <p><a href="shop.html">← Вернуться в магазин</a></p>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Heavy Logic. Электроника для людей.</p>
+            <p><a href="privacy.html">Политика конфиденциальности</a> | <a href="terms.html">Публичная оферта</a></p>
+        </div>
+    </footer>
+
+    <div class="chat-widget">
+        <a href="https://t.me/im_hot_tea" target="_blank" class="chat-button">💬 Написать в Telegram</a>
+    </div>
+
+    <script src="https://widget.cloudpayments.ru/bundles/cloudpayments"></script>
+    <script src="script.js"></script>
+</body>
+</html>

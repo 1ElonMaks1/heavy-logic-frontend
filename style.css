@@ -1,0 +1,553 @@
+/* style.css — Чёрно-белая монохромная тема Heavy Logic */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    color: #111111;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ----- ШАПКА ----- */
+header {
+    background: #000000;
+    color: #ffffff;
+    padding: 18px 0;
+    margin-bottom: 40px;
+    border-bottom: 1px solid #333333;
+}
+
+nav {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+nav a {
+    color: #cccccc;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    transition: color 0.2s ease;
+    letter-spacing: 0.3px;
+    position: relative;
+}
+
+nav a:hover {
+    color: #ffffff;
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #ffffff;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+}
+
+nav a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.logo:hover {
+    opacity: 0.9;
+}
+
+/* Корзина в шапке */
+.cart-icon {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cart-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.cart-link:hover {
+    opacity: 0.8;
+}
+
+.cart-count {
+    background: #ffffff;
+    color: #000000;
+    border-radius: 50%;
+    padding: 2px 8px;
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* ----- ГЕРОЙ-БЛОК ----- */
+.hero {
+    background: #000000;
+    color: #ffffff;
+    padding: 50px 45px;
+    border-radius: 0px;
+    margin-bottom: 50px;
+    border: 1px solid #333333;
+}
+
+.hero h2 {
+    margin-top: 0;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
+
+/* ----- КНОПКИ ----- */
+.btn {
+    background: #000000;
+    border: 1.5px solid #000000;
+    color: #ffffff;
+    padding: 12px 28px;
+    border-radius: 0px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    background: #ffffff;
+    color: #000000;
+    border: 1.5px solid #000000;
+}
+
+/* ----- КАРТОЧКИ ТОВАРОВ И УСЛУГ ----- */
+.product-grid {
+    display: flex;
+    gap: 30px;
+    margin: 40px 0;
+    flex-wrap: wrap;
+}
+
+.product-card {
+    background: #ffffff;
+    border-radius: 0px;
+    padding: 30px;
+    box-shadow: none;
+    flex: 1 1 280px;
+    border: 1.5px solid #000000;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 8px 8px 0 #000000;
+}
+
+.product-card h3 {
+    margin-top: 0;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.3px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 12px;
+}
+
+.product-card h3 a {
+    text-decoration: none;
+    color: #000000;
+}
+
+.price {
+    font-size: 28px;
+    font-weight: 700;
+    color: #000000;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #888888;
+    margin-left: 12px;
+    font-weight: 400;
+}
+
+.product-card button,
+button.add-to-cart {
+    background: #000000;
+    color: #ffffff;
+    border: 1.5px solid #000000;
+    padding: 12px 20px;
+    border-radius: 0px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    transition: all 0.2s;
+}
+
+.product-card button:hover,
+button.add-to-cart:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* ----- УСЛУГИ ----- */
+.service-list {
+    display: flex;
+    gap: 25px;
+    margin: 40px 0;
+    flex-wrap: wrap;
+}
+
+.service-item {
+    background: #ffffff;
+    border-radius: 0px;
+    padding: 30px 20px;
+    flex: 1 1 200px;
+    border: 1.5px solid #000000;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.service-item:hover {
+    transform: scale(0.98);
+    background: #f8f8f8;
+}
+
+.service-item h3 {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+/* ----- ФУТЕР ----- */
+footer {
+    background: #000000;
+    color: #ffffff;
+    padding: 35px 0;
+    margin-top: 70px;
+    text-align: center;
+    border-top: 1px solid #333333;
+    font-size: 14px;
+}
+
+footer a {
+    color: #cccccc;
+    text-decoration: underline;
+    margin: 0 10px;
+}
+
+footer a:hover {
+    color: #ffffff;
+}
+
+/* ----- БЕЙДЖИ И LAB ----- */
+.lab-badge {
+    background: #000000;
+    color: #ffffff;
+    border-radius: 0px;
+    padding: 6px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-block;
+    border: 1px solid #ffffff;
+}
+
+.lab-block {
+    background: #f2f2f2;
+    border-radius: 0px;
+    padding: 35px;
+    margin: 50px 0;
+    border-left: 6px solid #000000;
+}
+
+.lab-block input {
+    padding: 12px 16px;
+    border-radius: 0px;
+    border: 1.5px solid #000000;
+    width: 260px;
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+}
+
+/* ----- КОРЗИНА ----- */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 0px;
+    margin-bottom: 15px;
+    border: 1.5px solid #000000;
+}
+
+.cart-total {
+    text-align: right;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 30px 0;
+    padding-top: 15px;
+    border-top: 2px solid #000000;
+}
+
+.remove-from-cart {
+    background: #ffffff;
+    color: #000000;
+    border: 1.5px solid #000000;
+    padding: 5px 15px;
+    border-radius: 0px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+
+.remove-from-cart:hover {
+    background: #000000;
+    color: #ffffff;
+}
+
+/* ----- ФОРМЫ ----- */
+input, textarea {
+    border: 1.5px solid #000000;
+    background: #ffffff;
+    padding: 14px 16px;
+    border-radius: 0px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    width: 100%;
+    margin-bottom: 18px;
+    transition: border 0.2s;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-width: 2px;
+    background: #fafafa;
+}
+
+form {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 0px;
+    border: 1.5px solid #000000;
+}
+
+/* ----- ЗАГОЛОВКИ И АКЦЕНТЫ ----- */
+h1, h2, h3 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+h2 {
+    border-left: 8px solid #000000;
+    padding-left: 20px;
+    margin-top: 50px;
+}
+
+a {
+    color: #000000;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+    transition: opacity 0.2s;
+}
+
+a:hover {
+    opacity: 0.7;
+}
+
+/* ----- ЧАТ-ВИДЖЕТ ----- */
+.chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.chat-button {
+    background: #000;
+    color: white;
+    border: 1.5px solid #000;
+    border-radius: 0;
+    padding: 15px 25px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 5px 5px 0 #ccc;
+    transition: 0.2s;
+}
+
+.chat-button:hover {
+    background: white;
+    color: black;
+    box-shadow: 2px 2px 0 #ccc;
+}
+
+/* ----- АДАПТИВНОСТЬ ----- */
+@media (max-width: 700px) {
+    .container {
+        padding: 15px;
+    }
+    header .container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .cart-icon {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+    nav {
+        gap: 20px;
+    }
+    .hero {
+        padding: 35px 25px;
+    }
+    .hero h2 {
+        font-size: 28px;
+    }
+    .product-card {
+        flex: 1 1 100%;
+    }
+    .logo {
+        font-size: 24px;
+    }
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .cart-item div:last-child {
+        align-self: flex-end;
+    }
+}
+
+/* ----- УТИЛИТЫ ----- */
+.text-muted {
+    color: #666666;
+}
+.bg-black {
+    background: #000000;
+    color: #ffffff;
+}
+.border-black {
+    border: 1.5px solid #000000;
+}
+/* ----- ВСПЛЫВАЮЩЕЕ УВЕДОМЛЕНИЕ (TOAST) ----- */
+.toast-notification {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000000;
+    color: #ffffff;
+    border: 1.5px solid #ffffff;
+    padding: 14px 28px;
+    font-weight: 500;
+    font-size: 16px;
+    text-align: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+    max-width: 90%;
+    pointer-events: none;
+}
+
+.toast-notification.show {
+    opacity: 1;
+}
+
+@media (max-width: 600px) {
+    .toast-notification {
+        bottom: 20px;
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+}
+/* Кнопки + и - в корзине */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 15px;
+}
+
+.quantity-btn {
+    background: #ffffff;
+    border: 1.5px solid #000000;
+    color: #000000;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.quantity-btn:hover {
+    background: #000000;
+    color: #ffffff;
+}
+
+.quantity-input {
+    width: 40px;
+    text-align: center;
+    border: 1.5px solid #000000;
+    padding: 5px;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Блок доставки */
+.shipping-option {
+    margin-right: 20px;
+}
