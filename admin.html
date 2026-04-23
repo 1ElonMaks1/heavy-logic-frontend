@@ -7,31 +7,50 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .admin-container { max-width: 800px; margin: 40px auto; }
-        .product-edit { border: 1.5px solid #000; padding: 20px; margin-bottom: 20px; }
-        label { display: block; margin: 10px 0 5px; font-weight: bold; }
-        input, textarea { width: 100%; padding: 8px; }
+        .product-card-admin { border: 1.5px solid #000; padding: 20px; margin-bottom: 20px; background: #fff; }
+        .product-card-admin input, .product-card-admin textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1.5px solid #000; }
+        .btn-small { padding: 6px 12px; font-size: 14px; margin-right: 10px; }
+        #login-panel input { width: 250px; }
     </style>
 </head>
 <body>
     <div class="container admin-container">
-        <h1>Админ-панель</h1>
+        <h1>Админ-панель Heavy Logic</h1>
+
+        <!-- Панель входа -->
         <div id="login-panel">
             <input type="password" id="admin-password" placeholder="Пароль">
             <button id="login-btn" class="btn">Войти</button>
         </div>
-        <div id="editor-panel" style="display: none;">
-            <button id="save-btn" class="btn">Сохранить изменения (скачать JSON)</button>
-            <button id="add-product-btn" class="btn" style="background: white; color: black;">Добавить товар</button>
-            <div id="products-editor"></div>
-            <p><a href="products.json" download="products_backup.json">Скачать резервную копию JSON</a></p>
+
+        <!-- Основная панель (скрыта до входа) -->
+        <div id="admin-panel" style="display: none;">
+            <div style="margin-bottom: 30px;">
+                <h2>Добавить новый товар</h2>
+                <form id="add-product-form">
+                    <input type="text" name="name" placeholder="Название" required>
+                    <input type="number" name="price" placeholder="Цена" step="0.01" required>
+                    <input type="number" name="old_price" placeholder="Старая цена (необязательно)" step="0.01">
+                    <textarea name="description" placeholder="Описание"></textarea>
+                    <input type="text" name="image" placeholder="URL картинки" value="images/placeholder.jpg">
+                    <input type="text" name="features" placeholder="Характеристики (через запятую)">
+                    <button type="submit" class="btn">Добавить товар</button>
+                </form>
+            </div>
+
+            <h2>Существующие товары</h2>
+            <div id="products-list"></div>
         </div>
     </div>
 
     <script>
-        // Замените хэш на свой (SHA-256 от вашего пароля)
-        const SECRET_HASH = 'a21a4cdc3eab3e1ee4d64bfe63081801ef0cded049c2f0e8c30abe78d66808c4'; // пароль "password"
+        // Пароль: 'heavy123' (замени на свой и сгенерируй хеш)
+        const SECRET_HASH = '3419fad7d6261cc8162c7d399291ae43f7255829f4bfd15b763cf4d42cfc7003'; // 'password'
+        const API_BASE = 'https://heavy-logic-api-production.up.railway.app';
+
         let products = [];
 
+        // Проверка входа
         document.getElementById('login-btn').addEventListener('click', async () => {
             const pass = document.getElementById('admin-password').value;
             const encoder = new TextEncoder();
@@ -39,11 +58,10 @@
             const hashBuffer = await crypto.subtle.digest('SHA-256', data);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            
             if (hashHex === SECRET_HASH) {
                 sessionStorage.setItem('admin_auth', 'true');
                 document.getElementById('login-panel').style.display = 'none';
-                document.getElementById('editor-panel').style.display = 'block';
+                document.getElementById('admin-panel').style.display = 'block';
                 loadProducts();
             } else {
                 alert('Неверный пароль');
@@ -52,77 +70,95 @@
 
         if (sessionStorage.getItem('admin_auth') === 'true') {
             document.getElementById('login-panel').style.display = 'none';
-            document.getElementById('editor-panel').style.display = 'block';
+            document.getElementById('admin-panel').style.display = 'block';
             loadProducts();
         }
 
         async function loadProducts() {
-            const res = await fetch('products.json');
+            const res = await fetch(`${API_BASE}/products`);
             products = await res.json();
-            renderEditor();
+            renderProductsList();
         }
 
-        function renderEditor() {
-            const container = document.getElementById('products-editor');
+        function renderProductsList() {
+            const container = document.getElementById('products-list');
             container.innerHTML = '';
-            products.forEach((product, index) => {
-                const div = document.createElement('div');
-                div.className = 'product-edit';
-                div.innerHTML = `
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card-admin';
+                card.innerHTML = `
                     <h3>${product.name} (ID: ${product.id})</h3>
-                    <label>Название: <input data-index="${index}" data-field="name" value="${product.name}"></label>
-                    <label>Цена: <input data-index="${index}" data-field="price" type="number" value="${product.price}"></label>
-                    <label>Старая цена: <input data-index="${index}" data-field="oldPrice" type="number" value="${product.oldPrice || ''}"></label>
-                    <label>Описание: <textarea data-index="${index}" data-field="description">${product.description}</textarea></label>
-                    <label>Изображение (URL): <input data-index="${index}" data-field="image" value="${product.image}"></label>
-                    <label>Характеристики (через запятую): <input data-index="${index}" data-field="featuresStr" value="${product.features.join(', ')}"></label>
-                    <button class="remove-product" data-index="${index}" style="background: none; border: 1.5px solid #000; padding: 5px 10px; cursor: pointer;">Удалить товар</button>
+                    <label>Название: <input type="text" data-id="${product.id}" data-field="name" value="${product.name}"></label>
+                    <label>Цена: <input type="number" data-id="${product.id}" data-field="price" value="${product.price}" step="0.01"></label>
+                    <label>Старая цена: <input type="number" data-id="${product.id}" data-field="old_price" value="${product.old_price || ''}" step="0.01"></label>
+                    <label>Описание: <textarea data-id="${product.id}" data-field="description">${product.description || ''}</textarea></label>
+                    <label>Картинка: <input type="text" data-id="${product.id}" data-field="image" value="${product.image}"></label>
+                    <label>Характеристики (через запятую): <input type="text" data-id="${product.id}" data-field="features" value="${product.features.join(', ')}"></label>
+                    <button class="btn-small" onclick="updateProduct(${product.id})">Сохранить</button>
+                    <button class="btn-small" style="background: white; color: black;" onclick="deleteProduct(${product.id})">Удалить</button>
                 `;
-                container.appendChild(div);
-            });
-
-            document.querySelectorAll('.remove-product').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = e.target.dataset.index;
-                    products.splice(index, 1);
-                    renderEditor();
-                });
+                container.appendChild(card);
             });
         }
 
-        document.getElementById('save-btn').addEventListener('click', () => {
-            const inputs = document.querySelectorAll('[data-index]');
-            inputs.forEach(input => {
-                const index = input.dataset.index;
-                const field = input.dataset.field;
-                let value = input.value;
-                if (field === 'price' || field === 'oldPrice') value = Number(value);
-                if (field === 'featuresStr') {
-                    products[index].features = value.split(',').map(s => s.trim());
-                } else {
-                    products[index][field] = value;
-                }
+        async function updateProduct(id) {
+            const fields = document.querySelectorAll(`[data-id="${id}"]`);
+            const data = {};
+            fields.forEach(field => {
+                let value = field.value;
+                if (field.dataset.field === 'price' || field.dataset.field === 'old_price') value = parseFloat(value) || null;
+                if (field.dataset.field === 'features') value = value.split(',').map(s => s.trim());
+                data[field.dataset.field] = value;
             });
-            const blob = new Blob([JSON.stringify(products, null, 2)], {type: 'application/json'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'products.json';
-            a.click();
-            alert('Файл сохранён. Замените им products.json на сервере.');
-        });
+            const res = await fetch(`${API_BASE}/products/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                alert('Товар обновлён');
+                loadProducts();
+            } else {
+                alert('Ошибка обновления');
+            }
+        }
 
-        document.getElementById('add-product-btn').addEventListener('click', () => {
-            const newId = Math.max(...products.map(p => p.id), 0) + 1;
-            products.push({
-                id: newId,
-                name: 'Новый товар',
-                price: 0,
-                oldPrice: null,
-                description: '',
-                features: [''],
-                image: 'images/placeholder.jpg'
+        async function deleteProduct(id) {
+            if (!confirm('Удалить товар?')) return;
+            const res = await fetch(`${API_BASE}/products/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                alert('Товар удалён');
+                loadProducts();
+            } else {
+                alert('Ошибка удаления');
+            }
+        }
+
+        document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const featuresStr = form.features.value;
+            const features = featuresStr ? featuresStr.split(',').map(s => s.trim()) : [];
+            const data = {
+                name: form.name.value,
+                price: parseFloat(form.price.value),
+                old_price: form.old_price.value ? parseFloat(form.old_price.value) : null,
+                description: form.description.value,
+                image: form.image.value,
+                features: features
+            };
+            const res = await fetch(`${API_BASE}/products`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
             });
-            renderEditor();
+            if (res.ok) {
+                alert('Товар добавлен');
+                form.reset();
+                loadProducts();
+            } else {
+                alert('Ошибка добавления');
+            }
         });
     </script>
 </body>
