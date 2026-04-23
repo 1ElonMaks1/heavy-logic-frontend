@@ -28,12 +28,12 @@
             <div style="margin-bottom: 30px;">
                 <h2>Добавить новый товар</h2>
                 <form id="add-product-form">
-                    <input type="text" name="name" placeholder="Название" required>
-                    <input type="number" name="price" placeholder="Цена" step="0.01" required>
-                    <input type="number" name="old_price" placeholder="Старая цена (необязательно)" step="0.01">
-                    <textarea name="description" placeholder="Описание"></textarea>
-                    <input type="text" name="image" placeholder="URL картинки" value="images/placeholder.jpg">
-                    <input type="text" name="features" placeholder="Характеристики (через запятую)">
+                    <input type="text" name="name" id="prod-name" placeholder="Название" required>
+                    <input type="number" name="price" id="prod-price" placeholder="Цена" step="0.01" required>
+                    <input type="number" name="old_price" id="prod-old-price" placeholder="Старая цена (необязательно)" step="0.01">
+                    <textarea name="description" id="prod-desc" placeholder="Описание"></textarea>
+                    <input type="text" name="image" id="prod-image" placeholder="URL картинки" value="images/placeholder.jpg">
+                    <input type="text" name="features" id="prod-features" placeholder="Характеристики (через запятую)">
                     <button type="submit" class="btn">Добавить товар</button>
                 </form>
             </div>
@@ -44,13 +44,14 @@
     </div>
 
     <script>
-        // Пароль: 'heavy123' (замени на свой и сгенерируй хеш)
-        const SECRET_HASH = '3419fad7d6261cc8162c7d399291ae43f7255829f4bfd15b763cf4d42cfc7003'; // 'password'
+        // ========== КОНФИГУРАЦИЯ ==========
         const API_BASE = 'https://heavy-logic-api-production.up.railway.app';
+        // Пароль: по умолчанию 'password' (хеш ниже). Замени на свой, если менял.
+        const SECRET_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
 
         let products = [];
 
-        // Проверка входа
+        // ========== АВТОРИЗАЦИЯ ==========
         document.getElementById('login-btn').addEventListener('click', async () => {
             const pass = document.getElementById('admin-password').value;
             const encoder = new TextEncoder();
@@ -58,6 +59,7 @@
             const hashBuffer = await crypto.subtle.digest('SHA-256', data);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            
             if (hashHex === SECRET_HASH) {
                 sessionStorage.setItem('admin_auth', 'true');
                 document.getElementById('login-panel').style.display = 'none';
@@ -74,10 +76,17 @@
             loadProducts();
         }
 
+        // ========== ЗАГРУЗКА ТОВАРОВ ==========
         async function loadProducts() {
-            const res = await fetch(`${API_BASE}/products`);
-            products = await res.json();
-            renderProductsList();
+            try {
+                const res = await fetch(`${API_BASE}/products`);
+                if (!res.ok) throw new Error('Ошибка загрузки');
+                products = await res.json();
+                renderProductsList();
+            } catch (err) {
+                console.error(err);
+                alert('Не удалось загрузить товары');
+            }
         }
 
         function renderProductsList() {
@@ -101,65 +110,84 @@
             });
         }
 
-        async function updateProduct(id) {
+        // ========== СОЗДАНИЕ ТОВАРА ==========
+        document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('prod-name').value.trim();
+            const price = parseFloat(document.getElementById('prod-price').value);
+            const oldPriceInput = document.getElementById('prod-old-price').value;
+            const old_price = oldPriceInput ? parseFloat(oldPriceInput) : null;
+            const description = document.getElementById('prod-desc').value.trim();
+            const image = document.getElementById('prod-image').value.trim();
+            const featuresStr = document.getElementById('prod-features').value.trim();
+            const features = featuresStr ? featuresStr.split(',').map(s => s.trim()) : [];
+
+            const data = { name, price, old_price, description, image, features };
+            console.log('Отправляем данные:', data);
+
+            try {
+                const res = await fetch(`${API_BASE}/products`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(errText);
+                }
+                alert('Товар добавлен!');
+                document.getElementById('add-product-form').reset();
+                loadProducts();
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка при добавлении товара: ' + err.message);
+            }
+        });
+
+        // ========== ОБНОВЛЕНИЕ ТОВАРА ==========
+        window.updateProduct = async function(id) {
             const fields = document.querySelectorAll(`[data-id="${id}"]`);
             const data = {};
             fields.forEach(field => {
                 let value = field.value;
-                if (field.dataset.field === 'price' || field.dataset.field === 'old_price') value = parseFloat(value) || null;
-                if (field.dataset.field === 'features') value = value.split(',').map(s => s.trim());
+                if (field.dataset.field === 'price' || field.dataset.field === 'old_price') {
+                    value = value === '' ? null : parseFloat(value);
+                }
+                if (field.dataset.field === 'features') {
+                    value = value.split(',').map(s => s.trim());
+                }
                 data[field.dataset.field] = value;
             });
-            const res = await fetch(`${API_BASE}/products/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            if (res.ok) {
+            console.log('Обновление товара', id, data);
+            try {
+                const res = await fetch(`${API_BASE}/products/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!res.ok) throw new Error(await res.text());
                 alert('Товар обновлён');
                 loadProducts();
-            } else {
-                alert('Ошибка обновления');
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка обновления: ' + err.message);
             }
-        }
+        };
 
-        async function deleteProduct(id) {
+        // ========== УДАЛЕНИЕ ТОВАРА ==========
+        window.deleteProduct = async function(id) {
             if (!confirm('Удалить товар?')) return;
-            const res = await fetch(`${API_BASE}/products/${id}`, { method: 'DELETE' });
-            if (res.ok) {
+            try {
+                const res = await fetch(`${API_BASE}/products/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error(await res.text());
                 alert('Товар удалён');
                 loadProducts();
-            } else {
-                alert('Ошибка удаления');
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка удаления: ' + err.message);
             }
-        }
-
-        document.getElementById('add-product-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const featuresStr = form.features.value;
-            const features = featuresStr ? featuresStr.split(',').map(s => s.trim()) : [];
-            const data = {
-                name: form.name.value,
-                price: parseFloat(form.price.value),
-                old_price: form.old_price.value ? parseFloat(form.old_price.value) : null,
-                description: form.description.value,
-                image: form.image.value,
-                features: features
-            };
-            const res = await fetch(`${API_BASE}/products`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            if (res.ok) {
-                alert('Товар добавлен');
-                form.reset();
-                loadProducts();
-            } else {
-                alert('Ошибка добавления');
-            }
-        });
+        };
     </script>
 </body>
 </html>
